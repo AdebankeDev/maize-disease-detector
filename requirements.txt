@@ -1,5 +1,5 @@
 streamlit==1.58.0
-tensorflow==2.15.0
+tensorflow-cpu
 numpy==1.24.4
 pillow
 protobuf==3.20.*
