@@ -4,6 +4,7 @@ import tensorflow as tf
 from PIL import Image
 
 from tensorflow.keras.applications.efficientnet import preprocess_input
+from tensorflow.keras.applications import EfficientNetB0
 
 # ═══════════════════════════════════════════════
 # PAGE CONFIG
@@ -54,10 +55,7 @@ def load_model():
     model = tf.keras.models.load_model(
                         "final_model.keras",
                         compile=False,
-                        custom_objects={
-                            "EfficientNetB0":
-                        EfficientNetB0
-                        }
+                        custom_objects={"EfficientNetB0": EfficientNetB0}
                         )
     return model
 
