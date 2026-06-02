@@ -1,181 +1,102 @@
 import streamlit as st
 import numpy as np
+import tensorflow as tf
 from PIL import Image
-import tflite_runtime.interpreter as tflite
 
-# ═══════════════════════════════════════════════
-# PREPROCESSING FUNCTION
-# ═══════════════════════════════════════════════
-def preprocess_input(img_array):
-    """Replicates EfficientNetB0 preprocessing without TensorFlow."""
-    img_array = img_array / 255.0
-    img_array = img_array - 0.5
-    img_array = img_array * 2.0
-    return img_array
-
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════
 # PAGE CONFIG
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════
 st.set_page_config(
     page_title="🌽 Maize Disease Detector",
     page_icon="🌽",
     layout="wide"
 )
 
-# ═══════════════════════════════════════════════
-# DISEASE INFO
-# ═══════════════════════════════════════════════
-DISEASE_INFO = {
-    'Blight': {
-        'severity': 'HIGH',
-        'description': 'Fungal disease causing large brown lesions on leaves.',
-        'symptoms': ['Brown spots', 'Yellow halo', 'Rapid spread'],
-        'treatment': ['Apply fungicide', 'Remove infected leaves', 'Improve airflow']
-    },
-    'Common_rust': {
-        'severity': 'MEDIUM',
-        'description': 'Rust fungus causing orange powdery pustules.',
-        'symptoms': ['Orange pustules', 'Yellow spots', 'Leaf damage'],
-        'treatment': ['Use fungicide', 'Remove infected leaves']
-    },
-    'Gray_leaf_spot': {
-        'severity': 'MEDIUM',
-        'description': 'Gray rectangular lesions on leaves.',
-        'symptoms': ['Gray patches', 'Dark borders', 'Leaf drying'],
-        'treatment': ['Apply fungicide', 'Reduce humidity']
-    },
-    'Healthy': {
-        'severity': 'NONE',
-        'description': 'No disease detected.',
-        'symptoms': ['Green leaves', 'Normal growth'],
-        'treatment': ['Maintain care routine']
-    }
-}
-
-class_names = ['Blight', 'Common_rust', 'Gray_leaf_spot', 'Healthy']
-
-# ═══════════════════════════════════════════════
-# LOAD TFLITE MODEL
-# ═══════════════════════════════════════════════
-@st.cache_resource
-def load_model():
-    interpreter = tflite.Interpreter(model_path="model.tflite")
-    interpreter.allocate_tensors()
-    return interpreter
-
-interpreter = load_model()
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
-
-# ═══════════════════════════════════════════════
-# PREDICTION FUNCTION
-# ═══════════════════════════════════════════════
-def predict(image):
-    image = image.resize((224, 224))
-    img_array = np.array(image).astype(np.float32)
-    img_array = preprocess_input(img_array)
-    img_array = np.expand_dims(img_array, axis=0)
-
-    interpreter.set_tensor(input_details[0]['index'], img_array)
-    interpreter.invoke()
-
-    output = interpreter.get_tensor(output_details[0]['index'])[0]
-    return output
-
-# ═══════════════════════════════════════════════
-# HEADER
-# ═══════════════════════════════════════════════
 st.title("🌽 Maize Disease Detector")
-st.write("AI-powered detection using EfficientNetB0")
+st.write("AI-powered maize disease detection using EfficientNetB0")
 
 st.divider()
 
-# ═══════════════════════════════════════════════
-# SIDEBAR
-# ═══════════════════════════════════════════════
-with st.sidebar:
-    st.header("📋 About")
-    st.write("""
-    Detect maize leaf diseases using deep learning.
-    
-    - Model: EfficientNetB0
-    - Format: TFLite
-    - Input: 224×224 images
-    """)
+# ═══════════════════════════════════════
+# CLASS LABELS
+# ═══════════════════════════════════════
+class_names = ['Blight', 'Common_rust', 'Gray_leaf_spot', 'Healthy']
 
-    st.divider()
+# ═══════════════════════════════════════
+# LOAD MODEL
+# ═══════════════════════════════════════
+@st.cache_resource
+def load_model():
+    return tf.keras.models.load_model("best_model.keras")
 
-    st.header("Diseases")
-    st.write("""
-    - Blight  
-    - Common Rust  
-    - Gray Leaf Spot  
-    - Healthy  
-    """)
+model = load_model()
 
-    st.divider()
-    st.warning("For educational use only.")
+# ═══════════════════════════════════════
+# PREPROCESSING (CORRECT + SIMPLE)
+# ═══════════════════════════════════════
+def preprocess(image):
+    image = image.resize((224, 224))
+    img = np.array(image).astype(np.float32)
 
-# ═══════════════════════════════════════════════
-# UPLOAD
-# ═══════════════════════════════════════════════
+    # EfficientNetB0 correct scaling
+    img = (img / 127.5) - 1.0
+
+    img = np.expand_dims(img, axis=0)
+    return img
+
+# ═══════════════════════════════════════
+# PREDICTION
+# ═══════════════════════════════════════
+def predict(image):
+    img = preprocess(image)
+    preds = model.predict(img, verbose=0)
+    return preds[0]
+
+# ═══════════════════════════════════════
+# UI
+# ═══════════════════════════════════════
 uploaded_file = st.file_uploader(
     "Upload maize leaf image",
     type=["jpg", "jpeg", "png"]
 )
 
-# ═══════════════════════════════════════════════
-# MAIN UI
-# ═══════════════════════════════════════════════
-if uploaded_file is not None:
+if uploaded_file:
 
     image = Image.open(uploaded_file).convert("RGB")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("📷 Image")
         st.image(image, use_container_width=True)
 
     with col2:
-        st.subheader("📊 Prediction")
 
-        predictions = predict(image)
+        if st.button("🔍 Predict"):
 
-        idx = np.argmax(predictions)
-        disease = class_names[idx]
-        confidence = float(predictions[idx])
+            predictions = predict(image)
 
-        info = DISEASE_INFO[disease]
+            idx = np.argmax(predictions)
+            disease = class_names[idx]
+            confidence = float(predictions[idx])
 
-        if disease == "Healthy":
-            st.success(f"🌱 {disease}")
-        else:
-            st.error(f"⚠️ {disease}")
+            if disease == "Healthy":
+                st.success(f"🌱 {disease}")
+            else:
+                st.error(f"⚠️ {disease}")
 
-        st.metric("Confidence", f"{confidence*100:.2f}%")
+            st.metric("Confidence", f"{confidence*100:.2f}%")
 
-        st.write(f"**Severity:** {info['severity']}")
-        st.write(info['description'])
+            st.divider()
 
-    st.divider()
+            st.subheader("Class Probabilities")
 
-    # ═══════════════════════════════════════════════
-    # FULL BREAKDOWN
-    # ═══════════════════════════════════════════════
-    st.subheader("📊 Class Probabilities")
+            for i, name in enumerate(class_names):
+                st.write(f"{name}: {predictions[i]*100:.2f}%")
 
-    col3, col4 = st.columns(2)
-
-    with col3:
-        for i, name in enumerate(class_names):
-            st.write(f"{name}: {predictions[i]*100:.2f}%")
-
-    with col4:
-        st.bar_chart({
-            name: float(prob)
-            for name, prob in zip(class_names, predictions)
-        })
+            st.bar_chart({
+                name: float(prob)
+                for name, prob in zip(class_names, predictions)
+            })
 
 else:
-    st.info("Upload an image to start prediction.")
+    st.info("Upload an image to start prediction")
