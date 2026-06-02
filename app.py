@@ -49,15 +49,13 @@ class_names = ['Blight', 'Common_rust', 'Gray_leaf_spot', 'Healthy']
 # ═══════════════════════════════════════════════
 # LOAD TFLITE MODEL
 # ═══════════════════════════════════════════════
+
 @st.cache_resource
 def load_model():
-    interpreter = tf.lite.Interpreter(model_path="model.tflite")
-    interpreter.allocate_tensors()
-    return interpreter
+    model = tf.keras.models.load_model("best_model.keras")
+    return model
 
-interpreter = load_model()
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+model = load_model()
 
 # ═══════════════════════════════════════════════
 # PREDICTION FUNCTION (FIXED)
@@ -67,16 +65,14 @@ def predict(image):
 
     img_array = np.array(image).astype(np.float32)
 
-    # 🔥 FIX: correct EfficientNet preprocessing
+    # ✔ correct EfficientNet preprocessing (TF version)
     img_array = preprocess_input(img_array)
 
     img_array = np.expand_dims(img_array, axis=0)
 
-    interpreter.set_tensor(input_details[0]['index'], img_array)
-    interpreter.invoke()
+    preds = model.predict(img_array, verbose=0)
 
-    output = interpreter.get_tensor(output_details[0]['index'])[0]
-    return output
+    return preds[0]
 
 # ═══════════════════════════════════════════════
 # HEADER
