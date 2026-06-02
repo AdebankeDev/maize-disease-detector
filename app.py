@@ -51,7 +51,14 @@ class_names = ['Blight', 'Common_rust', 'Gray_leaf_spot', 'Healthy']
 # ═══════════════════════════════════════════════
 @st.cache_resource
 def load_model():
-    model = tf.keras.models.load_model("final_model.keras")
+    model = tf.keras.models.load_model(
+                        "final_model.keras",
+                        compile=False,
+                        custom_objects={
+                            "EfficientNetB0":
+                        EfficientNetB0
+                        }
+                        )
     return model
 
 model = load_model()
