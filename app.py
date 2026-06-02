@@ -1,9 +1,17 @@
 import streamlit as st
 import numpy as np
-import tensorflow as tf
 from PIL import Image
+import tflite_runtime.interpreter as tflite
 
-from tensorflow.keras.applications.efficientnet import preprocess_input
+# ═══════════════════════════════════════════════
+# PREPROCESSING FUNCTION
+# ═══════════════════════════════════════════════
+def preprocess_input(img_array):
+    """Replicates EfficientNetB0 preprocessing without TensorFlow."""
+    img_array = img_array / 255.0
+    img_array = img_array - 0.5
+    img_array = img_array * 2.0
+    return img_array
 
 # ═══════════════════════════════════════════════
 # PAGE CONFIG
@@ -51,7 +59,7 @@ class_names = ['Blight', 'Common_rust', 'Gray_leaf_spot', 'Healthy']
 # ═══════════════════════════════════════════════
 @st.cache_resource
 def load_model():
-    interpreter = tf.lite.Interpreter(model_path="model.tflite")
+    interpreter = tflite.Interpreter(model_path="model.tflite")
     interpreter.allocate_tensors()
     return interpreter
 
@@ -60,16 +68,12 @@ input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
 # ═══════════════════════════════════════════════
-# PREDICTION FUNCTION (FIXED)
+# PREDICTION FUNCTION
 # ═══════════════════════════════════════════════
 def predict(image):
     image = image.resize((224, 224))
-
     img_array = np.array(image).astype(np.float32)
-
-    # 🔥 FIX: correct EfficientNet preprocessing
     img_array = preprocess_input(img_array)
-
     img_array = np.expand_dims(img_array, axis=0)
 
     interpreter.set_tensor(input_details[0]['index'], img_array)
@@ -144,16 +148,15 @@ if uploaded_file is not None:
 
         info = DISEASE_INFO[disease]
 
-        if st.button("🔍 Predict"):
-            if disease == "Healthy":
-                st.success(f"🌱 {disease}")
-            else:
-                st.error(f"⚠️ {disease}")
+        if disease == "Healthy":
+            st.success(f"🌱 {disease}")
+        else:
+            st.error(f"⚠️ {disease}")
 
-            st.metric("Confidence", f"{confidence*100:.2f}%")
+        st.metric("Confidence", f"{confidence*100:.2f}%")
 
-            st.write(f"**Severity:** {info['severity']}")
-            st.write(info['description'])
+        st.write(f"**Severity:** {info['severity']}")
+        st.write(info['description'])
 
     st.divider()
 
