@@ -150,7 +150,7 @@ if uploaded_file is not None:
 
     with col1:
         st.subheader("📷 Image")
-        import streamlit as st
+
         try:
             st.image(image, use_container_width=True)
         except TypeError:
@@ -159,15 +159,16 @@ if uploaded_file is not None:
     with col2:
         st.subheader("📊 Prediction")
 
-        predictions = predict(image)
-
-        idx = np.argmax(predictions)
-        disease = class_names[idx]
-        confidence = float(predictions[idx])
-
-        info = DISEASE_INFO[disease]
-
         if st.button("🔍 Predict"):
+
+            predictions = predict(image)
+
+            idx = np.argmax(predictions)
+            disease = class_names[idx]
+            confidence = float(predictions[idx])
+
+            info = DISEASE_INFO[disease]
+
             if disease == "Healthy":
                 st.success(f"🌱 {disease}")
             else:
@@ -178,24 +179,28 @@ if uploaded_file is not None:
             st.write(f"**Severity:** {info['severity']}")
             st.write(info['description'])
 
+            # store for breakdown
+            st.session_state["predictions"] = predictions
+
     st.divider()
 
-    # ═══════════════════════════════════════════════
-    # FULL BREAKDOWN
-    # ═══════════════════════════════════════════════
     st.subheader("📊 Class Probabilities")
 
-    col3, col4 = st.columns(2)
+    if "predictions" in st.session_state:
 
-    with col3:
-        for i, name in enumerate(class_names):
-            st.write(f"{name}: {predictions[i]*100:.2f}%")
+        predictions = st.session_state["predictions"]
 
-    with col4:
-        st.bar_chart({
-            name: float(prob)
-            for name, prob in zip(class_names, predictions)
-        })
+        col3, col4 = st.columns(2)
+
+        with col3:
+            for i, name in enumerate(class_names):
+                st.write(f"{name}: {predictions[i]*100:.2f}%")
+
+        with col4:
+            st.bar_chart({
+                name: float(prob)
+                for name, prob in zip(class_names, predictions)
+            })
 
 else:
     st.info("Upload an image to start prediction.")
