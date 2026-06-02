@@ -49,10 +49,9 @@ class_names = ['Blight', 'Common_rust', 'Gray_leaf_spot', 'Healthy']
 # ═══════════════════════════════════════════════
 # LOAD TFLITE MODEL
 # ═══════════════════════════════════════════════
-
 @st.cache_resource
 def load_model():
-    model = tf.keras.models.load_model("best_model.h5")
+    model = tf.keras.models.load_model("final_model.keras")
     return model
 
 model = load_model()
@@ -65,14 +64,14 @@ def predict(image):
 
     img_array = np.array(image).astype(np.float32)
 
-    # ✔ correct EfficientNet preprocessing (TF version)
+    # EfficientNet preprocessing (safe TF version)
     img_array = preprocess_input(img_array)
 
     img_array = np.expand_dims(img_array, axis=0)
 
-    preds = model.predict(img_array, verbose=0)
+    predictions = model.predict(img_array, verbose=0)
 
-    return preds[0]
+    return predictions[0]
 
 # ═══════════════════════════════════════════════
 # HEADER
