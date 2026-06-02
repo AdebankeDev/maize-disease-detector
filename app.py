@@ -5,6 +5,28 @@ from PIL import Image
 
 from tensorflow.keras.applications.efficientnet import preprocess_input
 from tensorflow.keras.applications import EfficientNetB0
+from tensorflow.keras import layers, models
+
+
+def build_model():
+    base_model = EfficientNetB0(
+        include_top=False,
+        weights='imagenet',
+        input_shape=(224, 224, 3)
+    )
+
+    base_model.trainable = False
+
+    model = models.Sequential([
+        base_model,
+        layers.GlobalAveragePooling2D(),
+        layers.Dropout(0.5),
+        layers.Dense(128, activation='relu'),
+        layers.Dropout(0.3),
+        layers.Dense(4, activation='softmax')
+    ])
+
+    return model
 
 # ═══════════════════════════════════════════════
 # PAGE CONFIG
@@ -48,15 +70,12 @@ DISEASE_INFO = {
 class_names = ['Blight', 'Common_rust', 'Gray_leaf_spot', 'Healthy']
 
 # ═══════════════════════════════════════════════
-# LOAD TFLITE MODEL
+# LOAD MODEL
 # ═══════════════════════════════════════════════
 @st.cache_resource
 def load_model():
-    model = tf.keras.models.load_model(
-                        "final_model.keras",
-                        compile=False,
-                        custom_objects={"EfficientNetB0": EfficientNetB0}
-                        )
+    model = build_model()
+    model.load_weights("model_weights.weights.h5")
     return model
 
 model = load_model()
