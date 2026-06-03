@@ -29,80 +29,70 @@ def build_model():
     return model
 
 # ═══════════════════════════════════════════════
-
 # PAGE CONFIG
-
 # ═══════════════════════════════════════════════
-
 st.set_page_config(
-page_title="🌽 Maize Disease Detection System",
-page_icon="🌽",
-layout="wide"
+    page_title="🌽 Maize Disease Detection System",
+    page_icon="🌽",
+    layout="wide"
 )
 
 # ═══════════════════════════════════════════════
-
 # HEADER
-
 # ═══════════════════════════════════════════════
-
 st.title("🌽 Maize Disease Detection System")
 
 st.caption(
-"AI-powered maize leaf disease identification using EfficientNetB0 and Deep Learning."
+    "AI-powered maize leaf disease identification using EfficientNetB0 and Deep Learning."
 )
 
 st.info(
-"📷 Upload a clear image of a maize leaf to receive an instant disease diagnosis and confidence score."
+    "📷 Upload a clear image of a maize leaf to receive an instant disease diagnosis and confidence score."
 )
 
 st.divider()
 
 # ═══════════════════════════════════════════════
-
 # SIDEBAR
-
 # ═══════════════════════════════════════════════
-
 with st.sidebar:
 
-```
-st.title("🌽 Project Overview")
+    st.title("🌽 Project Overview")
 
-st.success("AI-Powered Crop Disease Detection")
+    st.success("AI-Powered Crop Disease Detection")
 
-st.markdown("""
-### About This Project
+    st.markdown("""
+    ### About This Project
 
-Maize is one of the world's most important food crops, but its productivity can be severely affected by leaf diseases.
+    Maize is one of the world's most important food crops, but its productivity can be severely affected by leaf diseases.
 
-This project uses **Artificial Intelligence**, **Computer Vision**, and **Deep Learning** to automatically detect maize leaf diseases from uploaded images.
+    This project uses Artificial Intelligence, Computer Vision, and Deep Learning to automatically detect maize leaf diseases from uploaded images.
 
-The model is based on **EfficientNetB0**, a state-of-the-art convolutional neural network trained through transfer learning.
+    The model is based on EfficientNetB0, a state-of-the-art convolutional neural network trained through transfer learning.
 
-### Objectives
+    ### Objectives
 
-- Early disease identification
-- Faster crop monitoring
-- Reduced crop losses
-- Support for farmers and agricultural researchers
+    - Early disease identification
+    - Faster crop monitoring
+    - Reduced crop losses
+    - Support for farmers and agricultural researchers
 
-### Detectable Classes
+    ### Detectable Classes
 
-✅ Healthy
+    ✅ Healthy
 
-⚠️ Blight
+    ⚠️ Blight
 
-⚠️ Common Rust
+    ⚠️ Common Rust
 
-⚠️ Gray Leaf Spot
-""")
+    ⚠️ Gray Leaf Spot
+    """)
 
-st.divider()
+    st.divider()
 
-st.subheader("🎯 Model Information")
+    st.subheader("🎯 Model Information")
 
-st.info("""
+    st.info("""
 Architecture: EfficientNetB0
 
 Framework: TensorFlow / Keras
@@ -112,197 +102,191 @@ Input Size: 224 × 224
 Classes: 4
 
 Technique: Transfer Learning
-""")
-
-st.divider()
-
-with st.expander("🦠 Supported Diseases"):
-
-    st.markdown("""
-    **Blight**
-    - Brown lesions
-    - Yellow halo
-    - Rapid spread
-
-    **Common Rust**
-    - Orange powdery pustules
-    - Yellow spotting
-
-    **Gray Leaf Spot**
-    - Gray rectangular lesions
-    - Leaf drying
-
-    **Healthy**
-    - No visible disease symptoms
     """)
 
-st.divider()
+    st.divider()
 
-st.caption(
-    "Developed as a Machine Learning project for maize disease classification."
-)
-```
+    with st.expander("🦠 Supported Diseases"):
 
-# ═══════════════════════════════════════════════
+        st.markdown("""
+**Blight**
+- Brown lesions
+- Yellow halo
+- Rapid spread
 
-# FILE UPLOAD
+**Common Rust**
+- Orange powdery pustules
+- Yellow spotting
 
-# ═══════════════════════════════════════════════
+**Gray Leaf Spot**
+- Gray rectangular lesions
+- Leaf drying
 
-uploaded_file = st.file_uploader(
-"📤 Upload a Maize Leaf Image",
-type=["jpg", "jpeg", "png"],
-help="Supported formats: JPG, JPEG, PNG"
-)
+**Healthy**
+- No visible disease symptoms
+        """)
 
-# ═══════════════════════════════════════════════
+    st.divider()
 
-# MAIN UI
-
-# ═══════════════════════════════════════════════
-
-if uploaded_file is not None:
-
-```
-image = Image.open(uploaded_file).convert("RGB")
-
-col1, col2 = st.columns([1, 1])
-
-with col1:
-
-    st.subheader("📷 Uploaded Image")
-
-    try:
-        st.image(image, use_container_width=True)
-    except TypeError:
-        st.image(image, use_column_width=True)
-
-with col2:
-
-    st.subheader("🔍 Disease Prediction")
-
-    st.write(
-        "Click the button below to analyze the uploaded maize leaf."
+    st.caption(
+        "Developed as a Machine Learning project for maize disease classification."
     )
 
-    if st.button(
-        "🚀 Analyze Image",
-        use_container_width=True
-    ):
+# ═══════════════════════════════════════════════
+# FILE UPLOAD
+# ═══════════════════════════════════════════════
+uploaded_file = st.file_uploader(
+    "📤 Upload a Maize Leaf Image",
+    type=["jpg", "jpeg", "png"],
+    help="Supported formats: JPG, JPEG, PNG"
+)
 
-        predictions = predict(image)
+# ═══════════════════════════════════════════════
+# MAIN UI
+# ═══════════════════════════════════════════════
+if uploaded_file is not None:
 
-        idx = np.argmax(predictions)
-        disease = class_names[idx]
-        confidence = float(predictions[idx])
+    image = Image.open(uploaded_file).convert("RGB")
 
-        info = DISEASE_INFO[disease]
+    col1, col2 = st.columns([1, 1])
 
-        result_col1, result_col2 = st.columns(2)
+    with col1:
 
-        with result_col1:
+        st.subheader("📷 Uploaded Image")
 
-            if disease == "Healthy":
-                st.success("🌱 Healthy Leaf")
-            else:
-                st.error(f"⚠️ {disease}")
+        try:
+            st.image(image, use_container_width=True)
+        except TypeError:
+            st.image(image, use_column_width=True)
 
-        with result_col2:
+    with col2:
 
-            st.metric(
-                "Confidence",
-                f"{confidence*100:.2f}%"
-            )
+        st.subheader("🔍 Disease Prediction")
 
-        with st.expander(
-            "📋 Disease Details",
-            expanded=True
+        st.write(
+            "Click the button below to analyze the uploaded maize leaf."
+        )
+
+        if st.button(
+            "🚀 Analyze Image",
+            use_container_width=True
         ):
 
-            st.write(
-                f"**Severity Level:** {info['severity']}"
-            )
+            predictions = predict(image)
 
-            st.write(
-                f"**Description:** {info['description']}"
-            )
+            idx = np.argmax(predictions)
+            disease = class_names[idx]
+            confidence = float(predictions[idx])
 
-            st.write("### Symptoms")
+            info = DISEASE_INFO[disease]
 
-            for symptom in info["symptoms"]:
-                st.write(f"• {symptom}")
+            result_col1, result_col2 = st.columns(2)
 
-            st.write("### Recommended Treatment")
+            with result_col1:
 
-            for treatment in info["treatment"]:
-                st.write(f"• {treatment}")
+                if disease == "Healthy":
+                    st.success("🌱 Healthy Leaf")
+                else:
+                    st.error(f"⚠️ {disease}")
 
-        st.session_state["predictions"] = predictions
+            with result_col2:
 
-st.divider()
+                st.metric(
+                    "Confidence",
+                    f"{confidence * 100:.2f}%"
+                )
 
-st.subheader("📊 Prediction Analysis")
+            with st.expander(
+                "📋 Disease Details",
+                expanded=True
+            ):
 
-if "predictions" in st.session_state:
+                st.write(
+                    f"**Severity Level:** {info['severity']}"
+                )
 
-    predictions = st.session_state["predictions"]
+                st.write(
+                    f"**Description:** {info['description']}"
+                )
 
-    tab1, tab2 = st.tabs([
-        "📈 Confidence Scores",
-        "📊 Probability Chart"
-    ])
+                st.write("### Symptoms")
 
-    with tab1:
+                for symptom in info["symptoms"]:
+                    st.write(f"• {symptom}")
 
-        metric_col1, metric_col2 = st.columns(2)
+                st.write("### Recommended Treatment")
 
-        with metric_col1:
-            st.metric(
-                class_names[0],
-                f"{predictions[0]*100:.2f}%"
-            )
-            st.metric(
-                class_names[1],
-                f"{predictions[1]*100:.2f}%"
-            )
+                for treatment in info["treatment"]:
+                    st.write(f"• {treatment}")
 
-        with metric_col2:
-            st.metric(
-                class_names[2],
-                f"{predictions[2]*100:.2f}%"
-            )
-            st.metric(
-                class_names[3],
-                f"{predictions[3]*100:.2f}%"
-            )
+            st.session_state["predictions"] = predictions
 
-    with tab2:
+    st.divider()
 
-        st.bar_chart({
-            name: float(prob)
-            for name, prob in zip(
-                class_names,
-                predictions
-            )
-        })
-```
+    st.subheader("📊 Prediction Analysis")
+
+    if "predictions" in st.session_state:
+
+        predictions = st.session_state["predictions"]
+
+        tab1, tab2 = st.tabs(
+            [
+                "📈 Confidence Scores",
+                "📊 Probability Chart"
+            ]
+        )
+
+        with tab1:
+
+            metric_col1, metric_col2 = st.columns(2)
+
+            with metric_col1:
+
+                st.metric(
+                    class_names[0],
+                    f"{predictions[0] * 100:.2f}%"
+                )
+
+                st.metric(
+                    class_names[1],
+                    f"{predictions[1] * 100:.2f}%"
+                )
+
+            with metric_col2:
+
+                st.metric(
+                    class_names[2],
+                    f"{predictions[2] * 100:.2f}%"
+                )
+
+                st.metric(
+                    class_names[3],
+                    f"{predictions[3] * 100:.2f}%"
+                )
+
+        with tab2:
+
+            chart_data = {
+                name: float(prob)
+                for name, prob in zip(
+                    class_names,
+                    predictions
+                )
+            }
+
+            st.bar_chart(chart_data)
 
 else:
 
-```
-st.info(
-    "👆 Upload a maize leaf image to begin disease detection."
-)
-```
+    st.info(
+        "👆 Upload a maize leaf image to begin disease detection."
+    )
 
 # ═══════════════════════════════════════════════
-
 # FOOTER
-
 # ═══════════════════════════════════════════════
-
 st.divider()
 
 st.caption(
-"🌽 Maize Disease Detection System | Built with Streamlit, TensorFlow and EfficientNetB0"
+    "🌽 Maize Disease Detection System | Built with Streamlit, TensorFlow and EfficientNetB0"
 )
