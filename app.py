@@ -167,7 +167,6 @@ Technique: Transfer Learning
 # FILE UPLOAD
 # ═══════════════════════════════════════════════
 uploaded_file = st.file_uploader(
-    "📤 Upload a Maize Leaf Image",
     type=["jpg", "jpeg", "png"],
     help="Supported formats: JPG, JPEG, PNG"
 )
