@@ -5,7 +5,7 @@ An AI-powered web application that detects maize leaf diseases using a deep lear
 ---
 
 ## 🚀 Live Demo
-Add your Streamlit link here
+https://maize-disease-detector-v1.streamlit.app/
 
 ---
 
