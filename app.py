@@ -37,6 +37,37 @@ st.set_page_config(
     layout="wide"
 )
 
+
+═══════════════════════════════════════════════
+# LOAD MODEL
+# ═══════════════════════════════════════════════
+@st.cache_resource
+def load_model():
+    model = build_model()
+    model.load_weights("model_weights.weights.h5")
+    return model
+
+model = load_model()
+
+# ═══════════════════════════════════════════════
+# PREDICTION FUNCTION (FIXED)
+# ═══════════════════════════════════════════════
+def predict(image):
+    image = image.resize((224, 224))
+
+    img_array = np.array(image).astype(np.float32)
+
+    # EfficientNet preprocessing (safe TF version)
+    img_array = preprocess_input(img_array)
+
+    img_array = np.expand_dims(img_array, axis=0)
+
+    predictions = model.predict(img_array, verbose=0)
+
+    return predictions[0]
+
+# ═══════════════════════════════════════════════
+
 # ═══════════════════════════════════════════════
 # HEADER
 # ═══════════════════════════════════════════════
