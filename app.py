@@ -169,7 +169,7 @@ Technique: Transfer Learning
 
 uploaded_file = st.file_uploader(
     "📷 Select Leaf Image",
-    type=["jpg", "jpeg", "png"]
+    type=["jpg", "jpeg", "png"],
     help="Supported formats: JPG, JPEG, PNG"
 )
 
