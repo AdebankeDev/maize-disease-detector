@@ -166,8 +166,10 @@ Technique: Transfer Learning
 # ═══════════════════════════════════════════════
 # FILE UPLOAD
 # ═══════════════════════════════════════════════
+
 uploaded_file = st.file_uploader(
-    type=["jpg", "jpeg", "png"],
+    "📷 Select Leaf Image",
+    type=["jpg", "jpeg", "png"]
     help="Supported formats: JPG, JPEG, PNG"
 )
 
