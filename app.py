@@ -184,7 +184,10 @@ if uploaded_file is not None:
 
     with col1:
         st.subheader("📷 Image")
-        st.image(image, use_container_width=True)
+        try:
+            st.image(image, use_container_width=True)
+        except TypeError:
+            st.image(image, use_column_width=True)
 
     with col2:
         st.subheader("🔍 Prediction")
